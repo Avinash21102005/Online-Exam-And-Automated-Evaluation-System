@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evalio | Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: var(--glass-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-logo {
+            padding: 0 1.5rem 2rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: white;
+            background: rgba(79, 70, 229, 0.1);
+            border-right: 3px solid var(--primary);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 2rem 3rem;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Views */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .view-section.active {
+            display: block;
+        }
+
+        /* Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-top: 1rem;
+            color: var(--primary);
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        /* Exam Form */
+        .question-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed var(--border-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .rm-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: var(--danger);
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+        }
+        
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .logout-btn:hover { color: var(--danger); }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="#" class="sidebar-logo">
+                <i class="fa-solid fa-graduation-cap text-gradient"></i> Evalio
+            </a>
+            <div style="flex: 1;">
+                <div class="nav-item active" data-target="dashboard-view">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </div>
+                <div class="nav-item" data-target="create-exam-view">
+                    <i class="fa-solid fa-plus-circle"></i> Create Exam
+                </div>
+                <div class="nav-item" data-target="manage-exams-view">
+                    <i class="fa-solid fa-list-check"></i> Manage Exams
+                </div>
+                <div class="nav-item" data-target="results-view">
+                    <i class="fa-solid fa-medal"></i> Student Results
+                </div>
+            </div>
+            <div class="nav-item" id="logoutBtn" style="margin-top: auto;">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="topbar">
+                <h2 id="pageTitle">Admin Dashboard</h2>
+                <div class="user-profile">
+                    <span id="userName">Admin User</span>
+                    <div class="avatar" id="userInitial">A</div>
+                </div>
+            </div>
+
+            <!-- View: Dashboard -->
+            <section id="dashboard-view" class="view-section active">
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel">
+                        <div class="text-secondary">Total Students</div>
+                        <div class="stat-value" id="statStudents">0</div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="text-secondary">Active Exams</div>
+                        <div class="stat-value" id="statExams">0</div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="text-secondary">Total Submissions</div>
+                        <div class="stat-value" id="statSubmissions">0</div>
+                    </div>
+                </div>
+                
+                <div class="glass-panel" style="padding: 1.5rem;">
+                    <h3>Recent Submissions</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Exam</th>
+                                <th>Score</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentSubmissionsBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- View: Create Exam -->
+            <section id="create-exam-view" class="view-section">
+                <div class="glass-panel" style="padding: 2rem;">
+                    <form id="createExamForm">
+                        <div class="form-group">
+                            <label class="form-label">Exam Title</label>
+                            <input type="text" id="examTitle" class="form-input" required placeholder="e.g. Advanced JavaScript Concepts">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea id="examDesc" class="form-input" required rows="3" placeholder="Brief description of the exam..."></textarea>
+                        </div>
+                        <div class="form-group" style="width: 200px;">
+                            <label class="form-label">Duration (Minutes)</label>
+                            <input type="number" id="examDuration" class="form-input" required min="5" value="30">
+                        </div>
+                        
+                        <div style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                            <div class="flex justify-between items-center mb-8">
+                                <h3>Questions</h3>
+                                <button type="button" id="addQuestionBtn" class="btn btn-outline"><i class="fa-solid fa-plus"></i> Add Question</button>
+                            </div>
+                            
+                            <div id="questionsContainer">
+                                <!-- Question cards added via JS -->
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary mt-8" style="width: 100%;">Publish Exam</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- View: Manage Exams -->
+            <section id="manage-exams-view" class="view-section">
+                <div class="glass-panel" style="padding: 1.5rem;">
+                    <h3>All Exams</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Questions</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="examsListBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- View: Results -->
+            <section id="results-view" class="view-section">
+                <div class="glass-panel" style="padding: 1.5rem;">
+                    <div class="flex justify-between items-center mb-8">
+                        <h3>Detailed Analysis</h3>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <select id="filterExam" class="form-input" style="padding: 8px;">
+                                <option value="all">All Exams</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Exam</th>
+                                <th>Score</th>
+                                <th>Max Score</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analysisListBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
